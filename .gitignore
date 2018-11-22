@@ -1,2 +1,4 @@
 *.rdb
 .vagrant/
+*.retry
+roles_galaxy/

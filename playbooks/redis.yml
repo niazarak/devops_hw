@@ -1,0 +1,7 @@
+---
+
+- name: Deploy Redis playbook
+  hosts: redis
+  become: yes
+  roles:
+    - role: "roles_galaxy/geerlingguy.redis"

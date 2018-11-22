@@ -1,0 +1,12 @@
+---
+
+- name: Deploy Postgres playbook
+  hosts: db
+  become: yes
+  tasks:
+    - name: restart postgresql after configuration
+      service:
+        name: postgresql
+        state: restarted
+  roles:
+    - role: "roles_galaxy/ANXS.postgresql"

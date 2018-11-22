@@ -1,0 +1,12 @@
+---
+
+- name: Bootstrap play
+  become: yes
+  hosts: all
+  gather_facts: false
+  pre_tasks:
+    - name: 'install python2'
+      raw: sudo apt-get -y install python
+- import_playbook: postgres.yml
+- import_playbook: redis.yml
+- import_playbook: application.yml
