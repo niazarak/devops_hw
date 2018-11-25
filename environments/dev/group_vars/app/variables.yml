@@ -1,0 +1,8 @@
+---
+
+listen_port: 8080
+db_name: feed
+db_user: feed
+db_pass: "{{ vault_postgres_password }}"
+rss_feed: https://hackernoon.com/feed
+log_level: INFO

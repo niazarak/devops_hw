@@ -1,0 +1,39 @@
+---
+
+- name: Deploy application playbook
+  hosts: app
+  become: yes
+  tasks:
+    - name: Сopy application binary
+      copy:
+        src: application.git
+        dest: ~/application.git
+        mode: "a+x"
+
+    - name: Copy assets
+      synchronize:
+        src: static/
+        dest: ~/static/
+
+    - name: Copy systemd service
+      template:
+        src: application.service.j2
+        dest: /etc/systemd/system/application.service
+        mode: 664
+      notify:
+        - reload systemd
+
+    - name: Symlink application
+      file:
+        src: ~/application.git
+        dest: /usr/bin/application
+        state: link
+
+    - name: Start application service
+      systemd:
+        name: application.service
+        state: started
+  handlers:
+    - name: reload systemd
+      sudo: yes
+      command: systemctl daemon-reload

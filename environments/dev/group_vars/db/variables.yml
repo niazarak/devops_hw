@@ -1,0 +1,20 @@
+---
+
+postgresql_databases:
+  - name: feed
+postgresql_users:
+  - name: feed
+    password: "{{ vault_postgres_password }}"
+    encrypted: no
+
+postgresql_listen_addresses   : ["0.0.0.0"]
+postgresql_pg_hba_trust_hosts : 
+  - "{{ groups['app'][0] }}/32"
+
+postgresql_user_privileges:
+  - name: feed
+    db: feed
+    priv: "ALL"
+  - name: root
+    db: feed
+    priv: "ALL"

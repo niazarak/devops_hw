@@ -1,0 +1,15 @@
+[Unit]
+Description=Feed application
+After=network.target
+StartLimitBurst=30
+
+[Service]
+Type=simple
+user=root
+ExecStart=/usr/bin/application -listen-address 0.0.0.0:{{ listen_port }} -postgres.address postgres://{{ db_user }}:{{ db_pass }}@{{ groups['db'][0] }}:5432/{{ db_name }}?sslmode=disable -redis.address redis://{{ groups['redis'][0] }}:6379/0 -rss-feed {{ rss_feed }} -log-level {{ log_level }}
+WorkingDirectory=/root
+Restart=always
+RestartSec=180
+
+[Install]
+WantedBy=multi-user.target
