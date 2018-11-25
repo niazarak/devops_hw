@@ -1,0 +1,51 @@
+---
+
+version: '2.3'
+services:
+  redis:
+    image: redis:5.0
+    restart: always
+    networks: 
+      - compose_net
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+  db:
+    image: postgres:10-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: feed
+      POSTGRES_USER: feed
+      POSTGRES_PASSWORD: feed
+    networks: 
+      - compose_net
+    volumes:
+      - postgres-data:/var/lib/postgresql/data      
+    ports:
+      - "5432:5432"
+  app:
+    build:
+      context: ./app
+    image: app_image
+    restart: always
+    depends_on:
+      - redis
+      - db
+    environment:
+      REDIS_ADDRESS: redis://redis:6379
+      POSTGRES_ADDRESS: postgres://feed:feed@db:5432/feed?sslmode=disable
+      RSS_URL: https://hackernoon.com/feed
+      LOG_LEVEL: INFO
+    networks: 
+      - compose_net
+    ports:
+      - "8080:8080"
+networks:
+  compose_net:
+    driver: bridge
+volumes:
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
