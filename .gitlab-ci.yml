@@ -15,7 +15,7 @@ ansible_linting:
   stage: lint
   image: sdesbure/ansible-lint
   script:
-    - ansible-lint playbooks/*.yml -x ANSIBLE0012,ANSIBLE0006
+    - ansible-lint playbooks/*.yml
 
 build_app_master:
   stage: build
