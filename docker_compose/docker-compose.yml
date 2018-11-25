@@ -25,9 +25,9 @@ services:
     ports:
       - "5432:5432"
   app:
-    build:
-      context: ./app
-    image: app_image
+#    build:
+#      context: ./app
+    image: registry.gitlab.com/tfs18f-ekb-devops/student/a.kazarjan/devops_infra/app_image:latest
     restart: always
     depends_on:
       - redis
