@@ -41,6 +41,62 @@ services:
       - compose_net
     ports:
       - "8080:8080"
+  blackbox_exporter:
+    image: prom/blackbox-exporter:v0.12.0
+    restart: always
+    networks:
+      - compose_net
+    ports:
+      - "9115:9115"
+  node_exporter:
+    image: prom/node-exporter:v0.16.0
+    restart: always
+    networks:
+      - compose_net
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    ports:
+      - "9100:9100"
+  postgres_exporter:
+    image: wrouesnel/postgres_exporter:v0.4.7
+    restart: on-failure
+    command:
+      - --extend.query-path=/etc/postgres_exporter/queries.yml
+    depends_on:
+      - db
+    networks:
+      - compose_net
+    volumes:
+      - ./config/postgres_queries.yml:/etc/postgres_exporter/queries.yml
+    environment:
+      DATA_SOURCE_NAME: postgres://feed:feed@db:5432/feed?sslmode=disable
+    ports:
+      - "9187:9187"
+  redis_exporter:
+    image: oliver006/redis_exporter:v0.22.1
+    restart: on-failure
+    depends_on:
+      - redis
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    networks:
+      - compose_net
+    ports:
+      - "9121:9121"
+  prometheus:
+    image: prom/prometheus:v2.5.0
+    restart: on-failure
+    depends_on:
+      - postgres_exporter
+      - redis_exporter
+    networks:
+      - compose_net
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
 networks:
   compose_net:
     driver: bridge
