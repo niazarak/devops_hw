@@ -41,6 +41,15 @@ services:
       - compose_net
     ports:
       - "8080:8080"
+  app_exporter:
+    image: registry.gitlab.com/tfs18f-ekb-devops/student/a.kazarjan/app-exporter:latest
+    restart: always
+    depends_on:
+      - app
+    networks:
+      - compose_net
+    ports:
+      - "7777:7777"
   blackbox_exporter:
     image: prom/blackbox-exporter:v0.12.0
     restart: always
@@ -85,6 +94,15 @@ services:
       - compose_net
     ports:
       - "9121:9121"
+  alertmanager:
+    image: prom/alertmanager:v0.15.3
+    restart: on-failure
+    networks:
+      - compose_net
+    volumes:
+      - ./config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    ports:
+      - "9093:9093"
   prometheus:
     image: prom/prometheus:v2.5.0
     restart: on-failure
@@ -94,9 +112,19 @@ services:
     networks:
       - compose_net
     volumes:
-      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/:/etc/prometheus/
     ports:
       - "9090:9090"
+  grafana:
+    image: grafana/grafana:5.3.4
+    depends_on:
+      - prometheus
+    networks:
+      - compose_net
+    volumes:
+      - ./grafana:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
 networks:
   compose_net:
     driver: bridge

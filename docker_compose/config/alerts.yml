@@ -1,0 +1,92 @@
+groups:
+  - name: main
+    rules:
+      # prometheus
+      - alert: ExporterDown
+        expr: up{} == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Exporter down (instance {{ $labels.instance }})"
+          description: "Prometheus exporter down\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+      # exporters
+      - alert: OutOfMemory
+        expr: (node_memory_MemFree{} + node_memory_Cached{} + node_memory_Buffers{}) / node_memory_MemTotal{} * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Out of memory (instance {{ $labels.instance }})"
+          description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      - alert: OutOfDiskSpace
+        expr: node_filesystem_free{mountpoint ="/rootfs"} / node_filesystem_size{mountpoint ="/rootfs"} * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Out of disk space (instance {{ $labels.instance }})"
+          description: "Disk is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      - alert: CpuLoad
+        expr: avg by (instance) (sum by (cpu) (rate(node_cpu{mode!="idle"}[5m]))) * 100 > 75
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU load (instance {{ $labels.instance }})"
+          description: "CPU load (15m) is high (> 75%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      - alert: UnusualDiskReadLatency
+        expr: rate(node_disk_read_time_ms{}[1m]) / rate(node_disk_reads_completed{}[1m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unusual disk read latency (instance {{ $labels.instance }})"
+          description: "Disk latency is growing (read operations > 100ms)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+      # postgres
+      - alert: PostgresqlDown
+        expr: pg_up{} == 0
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL down (instance {{ $labels.instance }})"
+          description: "PostgreSQL instance is down\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      - alert: DeadLocks
+        expr: rate(pg_stat_database_deadlocks{}[1m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Dead locks (instance {{ $labels.instance }})"
+          description: "PostgreSQL has dead-locks\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+      # redis
+      - alert: RedisDown
+        expr: redis_up{} == 0
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis down (instance {{ $labels.instance }})"
+          description: "Redis instance is down\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      - alert: OutOfMemory
+        expr: redis_memory_used_bytes{} / redis_total_system_memory_bytes{} * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Out of memory (instance {{ $labels.instance }})"
+          description: "Redis is running out of memory (> 90%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+      # blackbox
+      - alert: ProbeFailed
+        expr: probe_success{} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Endpoint {{ $labels.instance }} down"
+          description: "Endpoint is not responding to probes\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
