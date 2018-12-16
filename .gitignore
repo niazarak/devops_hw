@@ -3,3 +3,4 @@
 *.retry
 roles_galaxy/
 .DS_Store
+.idea/

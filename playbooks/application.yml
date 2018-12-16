@@ -2,7 +2,7 @@
 
 - name: Deploy application playbook
   hosts: app
-  become: yes
+  become: true
   tasks:
     - name: Сopy application binary
       copy:
@@ -19,7 +19,7 @@
       template:
         src: application.service.j2
         dest: /etc/systemd/system/application.service
-        mode: 664
+        mode: 0664
       notify:
         - reload systemd
 
@@ -35,5 +35,5 @@
         state: started
   handlers:
     - name: reload systemd
-      sudo: yes
+      become: true
       command: systemctl daemon-reload

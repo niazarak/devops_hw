@@ -2,7 +2,7 @@
 
 - name: Deploy Postgres playbook
   hosts: db
-  become: yes
+  become: true
   tasks:
     - name: restart postgresql after configuration
       service:
